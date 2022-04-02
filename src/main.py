@@ -9,6 +9,7 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User
+from datastructure import Queue
 #from models import Person
 
 app = Flask(__name__)
@@ -20,6 +21,7 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
+queue = Queue()
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -30,14 +32,35 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
-
+@app.route('/all', methods=['GET'])
+def get_all():
+    allqueue = queue.get_queue()
     response_body = {
         "msg": "Hello, this is your GET /user response "
     }
 
     return jsonify(response_body), 200
+
+@app.route('/next', methods=['GET'])
+def get_queue():
+    if queue.get_size():
+        removed_guest = queue.deque()
+        response_body = {
+            "msg": f"{removed_guest['name']}, your table is ready"
+        }
+
+        return jsonify(response_body), 200
+
+@app.route('/new', methods=['POST'])
+def post_queue():
+    guest = request.json
+    size = queue.get_size()
+    queue.enqueue(guest)
+    response_body = {
+        "msg": f"Hello, {guest['name']}, you have been added, currently there are {size} customers in front of you. "
+    }
+
+    return jsonify(response_body), 200    
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
