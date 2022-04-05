@@ -51,6 +51,7 @@ def get_queue():
 
         return jsonify(response_body), 200
 
+
 @app.route('/new', methods=['POST'])
 def post_queue():
     guest = request.json

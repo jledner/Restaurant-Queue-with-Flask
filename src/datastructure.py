@@ -10,7 +10,8 @@ class Queue:
         return self._queue
             
     def dequeue(self):
-        return self._queue.pop()
+        lastinline = self._queue.pop()
+        return lastinline
 
     def get_queue(self):
         return self._queue
